@@ -1,0 +1,33 @@
+name: Mirror Packet Analyzer
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  mirror:
+    if: "!startsWith(github.event.head_commit.message, 'Mirror Packet_analyzer')"
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout target
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Copy original repository
+        shell: bash
+        run: |
+          git clone --depth 1 https://github.com/perryvegehan/Packet_analyzer.git /tmp/Packet_analyzer
+          find /tmp/Packet_analyzer -mindepth 1 -maxdepth 1 ! -name .git -exec cp -a {} . \;
+
+      - name: Commit exact copy
+        shell: bash
+        run: |
+          rm -f .github/workflows/mirror.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "Mirror Packet_analyzer into Deep_Packet"
+          git push origin HEAD:main
